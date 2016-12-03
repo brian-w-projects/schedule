@@ -37,7 +37,7 @@ Repeats and improperly formated entries will be ignored and data will be sorted.
 </ul>
 
 <h2>Methods:</h2>
-<p>next_action(display) #Returns number of seconds until next action in dictionary. display
+<p><h6>next_action(display)</h6> #Returns number of seconds until next action in dictionary. display
 determines where a statement is printed to the console indicating next run date/time.</p>
 
 <ul>
@@ -51,19 +51,17 @@ determines where a statement is printed to the console indicating next run date/
 </ul>
 
 
-<h2>save(file) #save Schedule file</h2>
+<h6>save(file) #save Schedule file</h6>
 
-<h2>@staticmethod</h2>
-<h2>load(filename) #load Schedule file</h2>
+<h6>@staticmethod load(filename) #load Schedule file</h6>
 
-The below are helper methods and never need to be called directly:
-format_day(single_day) #formats a list of times into xx:xx:xx format. Removes improperly
-formated elements from list
+<p><h6>format_day(single_day)</h6>#formats a list of times into xx:xx:xx format. Removes improperly
+formated elements from list</p>
 
-delete_time(day, inc_list) #deletes elements from list
+<p><h6>delete_time(day, inc_list)</h6> #deletes elements from list</p>
 
-add_time(day, inc_list) #adds elements to list
+<p><h6>add_time(day, inc_list)</h6> #adds elements to list</p>
 
-day_translate(day) #formats day input
+<p><h6>day_translate(day)</h6> #formats day input</p>
 
-helper() #prints command information to console
+<p><h6>helper()</h6> #prints command information to console</p>
