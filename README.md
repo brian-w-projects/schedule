@@ -32,8 +32,13 @@ Repeats and improperly formated entries will be ignored and data will be sorted.
 
 <ul>
   <li>Monday monday M m </li>
+  <li>Tuesday tuesday T t</li>
+  <li>Wednesday wednesday W w</li>
+  <li>Thursday thursday H h</li>
+  <li>Friday friday F f</li>
+  <li>Saturday saturday S s</li>
   <li>Sunday sunday U u</li>
-  <li>All    all    A a</li>
+  <li>All all A a</li>
 </ul>
 
 <h2>Methods:</h2>
@@ -51,17 +56,22 @@ determines where a statement is printed to the console indicating next run date/
 </ul>
 
 
-<h6>save(file) #save Schedule file</h6>
+<h4>save(file) #save Schedule file</h4>
 
-<h6>@staticmethod load(filename) #load Schedule file</h6>
+<h4>@staticmethod load(filename) #load Schedule file</h4>
 
-<p><h6>format_day(single_day)</h6>#formats a list of times into xx:xx:xx format. Removes improperly
+<h4>format_day(single_day)</h4>
+<p>#formats a list of times into xx:xx:xx format. Removes improperly
 formated elements from list</p>
 
-<p><h6>delete_time(day, inc_list)</h6> #deletes elements from list</p>
+<h4>delete_time(day, inc_list)</h4>
+<p>#deletes elements from list</p>
 
-<p><h6>add_time(day, inc_list)</h6> #adds elements to list</p>
+<h4>add_time(day, inc_list)</h4>
+<p>#adds elements to list</p>
 
-<p><h6>day_translate(day)</h6> #formats day input</p>
+<h4>day_translate(day)</h4>
+<p>#formats day input</p>
 
-<p><h6>helper()</h6> #prints command information to console</p>
+<h4>helper()</h4>
+<p>#prints command information to console</p>
