@@ -11,12 +11,21 @@ class Schedule():
                           'Friday': [],
                           'Saturday': [],
                           'Sunday': []
-                         }          
+                         }
+        elif type(times) == str:
+            try:
+                with open(os.path.join('schedule', times + '.p'), 'rb') as infile:
+                    self.times = pickle.load(infile).times
+            except Exception:
+                print('Could not find file')
+                sys.exit(1)
         else:
             self.times = times
 
         
     def next_action(self, display=False):
+        '''Returns the numbers of seconds bewteen the current time and the time of the next action.
+        Flag display determines where the next action time is displayed to the console'''
         now = datetime.datetime.now()
         combine = now
         
@@ -32,42 +41,8 @@ class Schedule():
             combine = datetime.datetime.combine(combine.date() + 
                 datetime.timedelta(days=1), datetime.time(0))	
 
-
-    def format_day(self, single_day):
-        reg = re.compile(r'(\d{1,2})((:\d{2}){0,2})(pm)?', re.IGNORECASE)
-
-        for i in range(len(single_day)):
-            mo = reg.search(single_day[i])
-
-            single_day[i] = ''
-
-            if mo == None:
-                continue
-
-            if mo.group(4) or int(mo.group(1)) == 12:
-                if 0 < int(mo.group(1)) < 12:
-                    single_day[i] = str(int(mo.group(1)) + 12)
-                else:
-                    single_day[i] = mo.group(1)
-            elif int(mo.group(1)) == 12:
-                single_day[i] = '00'
-            else:
-                if len(mo.group(1)) == 1:
-                       single_day[i] = '0' + mo.group(1)
-                else:
-                    single_day[i] = mo.group(1)
-
-            if mo.group(2):
-                single_day[i] += mo.group(2)
-                if len(mo.group(2)) == 3:
-                    single_day[i] += ':00'
-            else:
-                single_day[i] += ':00:00'
-
-        [single_day.remove(time) for time in single_day if time == '']
-
-
     def create_time(self):
+        '''Prompts the user to create and add their time object'''
         print('Ready to add times.')
         print('Type "list" to see commands')
         print('Type "done" when finished')
@@ -103,32 +78,44 @@ class Schedule():
                 self.delete_time(self.day_translate(mo.group(2)), inc_list)
             else:
                 self.add_time(self.day_translate(mo.group(2)), inc_list)
-                
 
-    def save(self, file):
-        try:
-            if not os.path.join(os.getcwd(), 'schedule'):
-                os.makedirs(os.path.join(os.getcwd(), 'scehdule'))
-        except:
-            print('Could not create storage folder.')
-            return
-        os.chdir('schedule')
+    def format_day(self, single_day):
+        '''Formats the contents of a list of times into xx:xx:xx military time. This is the format
+        read by the next_action method'''
+        reg = re.compile(r'(\d{1,2})((:\d{2}){0,2})(pm)?', re.IGNORECASE)
 
-        with open(file + '.p', 'wb') as outfile:
-            pickle.dump(self, outfile)
+        for i in range(len(single_day)):
+            mo = reg.search(single_day[i])
 
+            single_day[i] = ''
 
-    @staticmethod
-    def load(filename):
-        try:
-            with open(os.path.join('schedule', filename + '.p'), 'rb') as infile:
-                print('File information added')
-                return pickle.load(infile)
-        except Exception:
-            print('Could not find file')
-            
+            if mo == None:
+                continue
+
+            if mo.group(4) or int(mo.group(1)) == 12:
+                if 0 < int(mo.group(1)) < 12:
+                    single_day[i] = str(int(mo.group(1)) + 12)
+                else:
+                    single_day[i] = mo.group(1)
+            elif int(mo.group(1)) == 12:
+                single_day[i] = '00'
+            else:
+                if len(mo.group(1)) == 1:
+                       single_day[i] = '0' + mo.group(1)
+                else:
+                    single_day[i] = mo.group(1)
+
+            if mo.group(2):
+                single_day[i] += mo.group(2)
+                if len(mo.group(2)) == 3:
+                    single_day[i] += ':00'
+            else:
+                single_day[i] += ':00:00'
+
+        [single_day.remove(time) for time in single_day if time == '']
 
     def delete_time(self, day, inc_list):
+        '''used by create_time to delete times from schedule'''
         if day == 'All':
             for day in self.times.keys():
                 self.times[day] = [x for x in self.times[day] if x not in inc_list]
@@ -138,6 +125,7 @@ class Schedule():
             self.times[day].sort()
 
     def add_time(self, day, inc_list):
+        '''Used by create_time to add times to schedule'''
         if day == 'All':
             for day in self.times.keys():
                 [self.times[day].append(t) for t in inc_list if t not in self.times[day]]
@@ -146,8 +134,8 @@ class Schedule():
             [self.times[day].append(t) for t in inc_list if t not in self.times[day]]
             self.times[day].sort()
 
-
     def day_translate(self, day):
+        '''Used by create_time to translate common day shortcuts'''
         return { 'M' : 'Monday', 'm' : 'Monday',
                  'T' : 'Tuesday', 't' : 'Tuesday',
                  'W' : 'Wednesday', 'w' : 'Wednesday',
@@ -158,12 +146,27 @@ class Schedule():
                  'A' : 'All', 'a' : 'All'}.get(day, day)
 
     def helper(self):
+        '''Used by create_time to provide help to user'''
         print('day [time], [time],... to add times\n'+
               'del day [time], [time],... to delete times\n'+
               'See readme for acceptable [time] formats\n'+
               'clear to empty list\n'+
               'copy [filename] to add all elements from [filename]\n'+
               'done to finish editing')
+
+    def save(self, file):
+        '''Saves the object in the schedule folder via pickle'''
+        try:
+            if not os.path.join(os.getcwd(), 'schedule'):
+                os.makedirs(os.path.join(os.getcwd(), 'schedule'))
+        except:
+            print('Could not create storage folder.')
+            return
+        os.chdir('schedule')
+
+        with open(file + '.p', 'wb') as outfile:
+            pickle.dump(self, outfile)
+            print('File saved')
 
     def __str__(self):
         keys = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
@@ -177,5 +180,14 @@ class Schedule():
         return(str(self.times))
 
 if __name__ == '__main__':
-    y = Schedule()
+    if len(sys.argv) != 2 and len(sys.argv) != 3:
+        print('There are two ways to run this program.')
+        print('One parameter: Start with a fresh schedule. Save to this file name')
+        print('Two Parameters: (1) Filename to save (2) Existing file to load ')
+        sys.exit(1)
+    if len(sys.argv) == 3:
+        y = Schedule(sys.argv[2])
+    else:
+        y = Schedule()
     y.create_time()
+    y.save(sys.argv[1])
