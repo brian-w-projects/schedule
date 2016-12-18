@@ -2,29 +2,28 @@ import datetime, re, sys, os, pickle
 
 class Schedule():
     
-    def __init__(self, times=None):
-        if not times:
-            self.times = {'Monday' : [],
-                          'Tuesday' : [],
-                          'Wednesday': [],
-                          'Thursday': [],
-                          'Friday': [],
-                          'Saturday': [],
-                          'Sunday': []
-                         }
-        elif type(times) == str:
-            try:
-                with open(os.path.join('schedule', times + '.p'), 'rb') as infile:
-                    self.times = pickle.load(infile).times
-            except Exception:
-                print('Could not find file')
-                sys.exit(1)
-        else:
-            self.times = times
+    def __init__(self, load_list):
+        self.times = {'Monday' : [],
+                      'Tuesday' : [],
+                      'Wednesday': [],
+                      'Thursday': [],
+                      'Friday': [],
+                      'Saturday': [],
+                      'Sunday': []
+                    }
+        if len(load_list) != 0:
+            for to_load in load_list:
+                try:
+                    with open(os.path.join('schedule', to_load + '.p'), 'rb') as infile:
+                        for day, times_to_add in pickle.load(infile).times.items():
+                            self.add_time(day, times_to_add)
+                    print('Loaded file: {0}'.format(to_load))
+                except Exception:
+                    print('Could not find file: {0}'.format(to_load))
 
         
     def next_action(self, display=False):
-        '''Returns the numbers of seconds bewteen the current time and the time of the next action.
+        '''Returns the numbers of seconds between the current time and the time of the next action.
         Flag display determines where the next action time is displayed to the console'''
         now = datetime.datetime.now()
         combine = now
@@ -112,26 +111,28 @@ class Schedule():
             else:
                 single_day[i] += ':00:00'
 
-        [single_day.remove(time) for time in single_day if time == '']
+        for time in single_day:
+            if time == '':
+                single_day.remove(time)
 
     def delete_time(self, day, inc_list):
         '''used by create_time to delete times from schedule'''
         if day == 'All':
             for day in self.times.keys():
-                self.times[day] = [x for x in self.times[day] if x not in inc_list]
-            [day.sort() for day in self.times.values()]
+                self.times[day] = list(set(self.timesp[day]-set(inc_list)))
+                self.times[day].sort()
         else:
-            self.times[day] = [x for x in self.times[day] if x not in inc_list]
+            self.times[day] = list(set(self.times[day])-set(inc_list))
             self.times[day].sort()
 
     def add_time(self, day, inc_list):
         '''Used by create_time to add times to schedule'''
         if day == 'All':
             for day in self.times.keys():
-                [self.times[day].append(t) for t in inc_list if t not in self.times[day]]
-            [day.sort() for day in self.times.values()]
+                self.times[day] += list(set(inc_list) - set(self.times[day]))
+                self.times[day].sort()
         else:
-            [self.times[day].append(t) for t in inc_list if t not in self.times[day]]
+            self.times[day] += list(set(inc_list) - set(self.times[day]))
             self.times[day].sort()
 
     def day_translate(self, day):
@@ -180,14 +181,12 @@ class Schedule():
         return(str(self.times))
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2 and len(sys.argv) != 3:
+    if len(sys.argv) == 1:
         print('There are two ways to run this program.')
         print('One parameter: Start with a fresh schedule. Save to this file name')
-        print('Two Parameters: (1) Filename to save (2) Existing file to load ')
+        print('Two+ Parameters: (1) Filename to save (2+) Existing file to load ')
         sys.exit(1)
-    if len(sys.argv) == 3:
-        y = Schedule(sys.argv[2])
-    else:
-        y = Schedule()
+    _, save_as, *load_list = sys.argv
+    y = Schedule(load_list)
     y.create_time()
-    y.save(sys.argv[1])
+    y.save(save_as)
