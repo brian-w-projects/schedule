@@ -1,4 +1,4 @@
-import datetime, re, sys, os, pickle
+import datetime, re, sys, os, pickle, argparse
 
 class Schedule():
     
@@ -181,12 +181,13 @@ class Schedule():
         return(str(self.times))
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        print('There are two ways to run this program.')
-        print('One parameter: Start with a fresh schedule. Save to this file name')
-        print('Two+ Parameters: (1) Filename to save (2+) Existing file to load ')
-        sys.exit(1)
-    _, save_as, *load_list = sys.argv
+    parser = argparse.ArgumentParser(description='Easily create weekly schedules to automate tasks in python scripts')
+    parser.add_argument('filename', action='store', help='Set filename to save schedule to')
+    parser.add_argument('-l', action='store', nargs='*', dest='load_list', help='List other schedules to load information from')
+
+    results = parser.parse_args()
+    save_as = results.filename
+    load_list = results.load_list or []
     y = Schedule(load_list)
     y.create_time()
     y.save(save_as)
